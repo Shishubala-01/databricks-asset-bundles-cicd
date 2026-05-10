@@ -1,0 +1,49 @@
+# Databricks Asset Bundle configuration
+# This bundle deploys the Insurance DLT Pipeline as code.
+#
+# Deploy:  databricks bundle deploy --target dev
+# Run:     databricks bundle run --target dev insurance_dlt_pipeline
+# Destroy: databricks bundle destroy --target dev
+#
+# Author: Kumari Shishubala
+# Project: Insurance DLT Pipeline — Asset Bundle deployment
+
+bundle:
+  name: insurance-dlt-bundle
+
+# Workspace connection
+workspace:
+  host: https://dbc-c2d7d1b8-91e6.cloud.databricks.com
+
+# Resources — what gets deployed
+resources:
+  pipelines:
+    insurance_dlt_pipeline:
+      name: "insurance_dlt_pipeline_${bundle.target}"
+      target: "workspace.default"
+      serverless: true
+      catalog: "workspace"
+      configuration:
+        "pipelines.autoOptimize.managed": "true"
+      libraries:
+        - file:
+            path: src/insurance_dlt/01_bronze_dlt.py
+
+# Environment targets
+targets:
+  dev:
+    default: true
+    mode: development
+    resources:
+      pipelines:
+        insurance_dlt_pipeline:
+          name: "insurance_dlt_pipeline_dev"
+          development: true
+
+  prod:
+    mode: production
+    resources:
+      pipelines:
+        insurance_dlt_pipeline:
+          name: "insurance_dlt_pipeline_prod"
+          development: false
