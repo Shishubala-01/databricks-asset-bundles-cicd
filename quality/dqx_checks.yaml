@@ -1,0 +1,92 @@
+# DQX Data Quality Rules for Insurance DLT Pipeline
+# These rules complement the DLT expectations defined in the pipeline code.
+# DLT expectations provide pipeline-level quality gates (warn/drop/fail).
+# DQX rules provide row-level diagnostics (_errors/_warnings columns).
+#
+# Usage in a Databricks notebook:
+#   from databricks.labs.dqx.engine import DQEngine
+#   from databricks.sdk import WorkspaceClient
+#   dq_engine = DQEngine(WorkspaceClient())
+#   checks = dq_engine.load_checks_from_local_file("quality/dqx_checks.yaml")
+#   df_validated = dq_engine.apply_checks(df, checks["checks"])
+#
+# Author: Kumari Shishubala
+# Project: Insurance DLT Pipeline — DQX quality layer
+
+checks:
+  # ── Age validation ──
+  - criticality: "error"
+    check:
+      function: "is_not_null"
+      arguments:
+        col_name: "age"
+    name: "age_not_null"
+
+  - criticality: "error"
+    check:
+      function: "is_in_range"
+      arguments:
+        col_name: "age"
+        min_limit: 0
+        max_limit: 120
+    name: "age_in_valid_range"
+
+  # ── BMI validation ──
+  - criticality: "warn"
+    check:
+      function: "is_in_range"
+      arguments:
+        col_name: "bmi"
+        min_limit: 10
+        max_limit: 60
+    name: "bmi_plausible_range"
+
+  - criticality: "error"
+    check:
+      function: "is_not_null"
+      arguments:
+        col_name: "bmi"
+    name: "bmi_not_null"
+
+  # ── Charges validation ──
+  - criticality: "error"
+    check:
+      function: "is_not_negative"
+      arguments:
+        col_name: "charges"
+    name: "charges_non_negative"
+
+  # ── Region validation ──
+  - criticality: "error"
+    check:
+      function: "is_not_null"
+      arguments:
+        col_name: "region"
+    name: "region_not_null"
+
+  - criticality: "error"
+    check:
+      function: "is_in_list"
+      arguments:
+        col_name: "region"
+        allowed: ["northeast", "northwest", "southeast", "southwest"]
+    name: "region_valid_value"
+
+  # ── Smoker validation ──
+  - criticality: "error"
+    check:
+      function: "is_in_list"
+      arguments:
+        col_name: "smoker"
+        allowed: ["yes", "no"]
+    name: "smoker_valid_value"
+
+  # ── Children validation ──
+  - criticality: "warn"
+    check:
+      function: "is_in_range"
+      arguments:
+        col_name: "children"
+        min_limit: 0
+        max_limit: 10
+    name: "children_plausible_count"mkdir -p notebooks
